@@ -17,11 +17,11 @@ const tavilyApiKey = process.env.TAVILY_API_KEY;
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "https://api.triadfi.co/",
-  })
-);
+//app.use(
+  //cors({
+   // origin: "https://api.triadfi.co/",
+  //})
+//);
 
 app.use(express.json());
 

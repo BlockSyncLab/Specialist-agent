@@ -4,12 +4,13 @@ import { HumanMessage } from "@langchain/core/messages";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
 import express, { Request, Response } from "express";
-import cors from "cors";
 import { DateTime } from "luxon";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { trainAI } from './trainAI';  // Importando a função de treinamento
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const openaiApiKey = process.env.OPENAI_API_KEY;
@@ -18,9 +19,9 @@ const tavilyApiKey = process.env.TAVILY_API_KEY;
 const app = express();
 
 //app.use(
-  //cors({
-   // origin: "https://api.triadfi.co/",
-  //})
+//  cors({
+//    origin: "https://api.triadfi.co/",
+//  })
 //);
 
 app.use(express.json());
@@ -88,6 +89,10 @@ app.post("/ask", async (req: Request, res: Response) => {
     console.log("Question:", question);
     console.log("Agent:", agent);
     console.log("Date:", currentDate);
+
+    // Antes de processar a pergunta, treina a IA com o arquivo TXT do agente
+    const fileName = `${agent}.txt`;  // Assumindo que o nome do arquivo é baseado no agente
+    await trainAI(fileName);  // Chama a função de treinamento
 
     const prompt = loadPrompt(agent, question, currentDate);
     console.log("Final Prompt Sent to Model:", prompt);

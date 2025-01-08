@@ -91,7 +91,7 @@ app.post("/ask", async (req: Request, res: Response) => {
     console.log("Date:", currentDate);
 
     // Antes de processar a pergunta, treina a IA com o arquivo TXT do agente
-    const fileName = `${agent}.txt`;  // Assumindo que o nome do arquivo é baseado no agente
+    const fileName = `datacenter.txt`;  // Assumindo que o nome do arquivo é baseado no agente
     await trainAI(fileName);  // Chama a função de treinamento
 
     const prompt = loadPrompt(agent, question, currentDate);

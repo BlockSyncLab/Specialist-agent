@@ -25,6 +25,7 @@
     "langsmith": "^0.2.13",
     "luxon": "^3.5.0",
     "openai": "^4.77.0",
+    "pdf-lib": "^1.17.1",
     "pdf-parse": "^1.1.1",
     "solana-agent-kit": "^1.1.0",
     "tsx": "^4.19.2",

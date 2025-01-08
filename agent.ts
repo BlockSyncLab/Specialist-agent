@@ -4,24 +4,18 @@ import { HumanMessage } from "@langchain/core/messages";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
 import express, { Request, Response } from "express";
-import cors from "cors";
 import { DateTime } from "luxon";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { trainAI } from './trainAI';  // Importando a função de treinamento
+
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);  // Corrige o problema com __dirname em módulos ES
 const openaiApiKey = process.env.OPENAI_API_KEY;
 const tavilyApiKey = process.env.TAVILY_API_KEY;
 
 const app = express();
-
-//app.use(
-  //cors({
-   // origin: "https://api.triadfi.co/",
-  //})
-//);
 
 app.use(express.json());
 
@@ -57,9 +51,29 @@ const workflow = new StateGraph(MessagesAnnotation)
   .addEdge("tools", "agent")
   .addConditionalEdges("agent", shouldContinue);
 
-// Load prompt dynamically for the specified agent
-function loadPrompt(agent: string, question: string, date: string) {
+// Função para carregar arquivos da pasta 'info' (somente arquivos TXT)
+async function loadDataCenterFiles() {
+  const infoDir = path.join(__dirname, 'info');
+  const files = fs.readdirSync(infoDir);
+
+  const fileContents = [];
+
+  for (const file of files) {
+    const filePath = path.join(infoDir, file);
+
+    if (file.endsWith('.txt')) {
+      const textContent = fs.readFileSync(filePath, 'utf-8');
+      fileContents.push(textContent);
+    }
+  }
+
+  return fileContents.join('\n');  // Unir o conteúdo de todos os arquivos
+}
+
+// Load prompt dinamicamente para o agente especificado
+function loadPrompt(agent: string, question: string, date: string, datacenterContent: string) {
   const agentFilePath = path.join(__dirname, "Crew", `${agent}.txt`);
+  
   console.log("Loading Prompt from:", agentFilePath);
 
   if (!fs.existsSync(agentFilePath)) {
@@ -69,9 +83,11 @@ function loadPrompt(agent: string, question: string, date: string) {
   const agentPromptTemplate = fs.readFileSync(agentFilePath, "utf-8");
   console.log("Loaded Prompt Template:", agentPromptTemplate);
 
+  // Adiciona o conteúdo do datacenter ao prompt
   return agentPromptTemplate
     .replace(/{{DATE}}/g, date)
-    .replace(/{{QUESTION}}/g, question);
+    .replace(/{{QUESTION}}/g, question)
+    .replace(/{{DATACENTER}}/g, datacenterContent);  // Substituindo {{DATACENTER}} pelo conteúdo do treinamento
 }
 
 app.post("/ask", async (req: Request, res: Response) => {
@@ -89,7 +105,15 @@ app.post("/ask", async (req: Request, res: Response) => {
     console.log("Agent:", agent);
     console.log("Date:", currentDate);
 
-    const prompt = loadPrompt(agent, question, currentDate);
+    // Carregar o conteúdo de todos os arquivos da pasta 'info'
+    const datacenterContent = await loadDataCenterFiles();
+
+    // Treinar a IA com o conteúdo de datacenter.txt (ou outros arquivos)
+    const fileName = `datacenter.txt`;  // Nome fixo do arquivo de treinamento
+    await trainAI(fileName);  // Chama a função de treinamento
+
+    // Gerar o prompt com o conteúdo do datacenter e a pergunta
+    const prompt = loadPrompt(agent, question, currentDate, datacenterContent);
     console.log("Final Prompt Sent to Model:", prompt);
 
     const finalState = await workflow.compile().invoke({

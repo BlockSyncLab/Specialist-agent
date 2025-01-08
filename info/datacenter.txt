@@ -1,5 +1,5 @@
 ** Cronograma **
-
+** Previsão **
 Planejamento - Criação dos PIPs e agendamento da Plurall. 	10 a 21 de fevereiro
 Validação dos PIP's I (Articuladores)	24 a 26 de fevereiro
 Agendamento ReMar I	5 a 9 de maio

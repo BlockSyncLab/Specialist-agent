@@ -8,7 +8,6 @@ import { DateTime } from "luxon";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from 'url';
-import pdfParse from 'pdf-parse';
 import { trainAI } from './trainAI';  // Importando a função de treinamento
 
 const __filename = fileURLToPath(import.meta.url);
@@ -52,14 +51,7 @@ const workflow = new StateGraph(MessagesAnnotation)
   .addEdge("tools", "agent")
   .addConditionalEdges("agent", shouldContinue);
 
-// Função para ler e extrair texto de arquivos PDF
-async function extractTextFromPDF(pdfPath: string) {
-  const pdfBuffer = fs.readFileSync(pdfPath);
-  const pdfData = await pdfParse(pdfBuffer);
-  return pdfData.text;
-}
-
-// Função para carregar arquivos da pasta 'info' (incluindo PDF e TXT)
+// Função para carregar arquivos da pasta 'info' (somente arquivos TXT)
 async function loadDataCenterFiles() {
   const infoDir = path.join(__dirname, 'info');
   const files = fs.readdirSync(infoDir);
@@ -72,11 +64,6 @@ async function loadDataCenterFiles() {
     if (file.endsWith('.txt')) {
       const textContent = fs.readFileSync(filePath, 'utf-8');
       fileContents.push(textContent);
-    }
-
-    if (file.endsWith('.pdf')) {
-      const pdfText = await extractTextFromPDF(filePath);
-      fileContents.push(pdfText);
     }
   }
 

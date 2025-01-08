@@ -8,8 +8,8 @@ import { DateTime } from "luxon";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from 'url';
-import { PDFDocument } from "pdf-lib";  // Importando para leitura de arquivos PDF
 import { trainAI } from './trainAI';  // Importando a função de treinamento
+import pdf from 'pdf-parse';  // Importando pdf-parse para extração de texto de PDFs
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);  // Corrige o problema com __dirname em módulos ES
@@ -52,7 +52,13 @@ const workflow = new StateGraph(MessagesAnnotation)
   .addEdge("tools", "agent")
   .addConditionalEdges("agent", shouldContinue);
 
-// Função para ler arquivos .txt e .pdf na pasta info
+// Função para extrair texto de arquivos PDF usando pdf-parse
+async function extractTextFromPDF(pdfBuffer: Buffer): Promise<string> {
+  const data = await pdf(pdfBuffer);  // Parse do arquivo PDF
+  return data.text;  // Retorna o texto extraído do PDF
+}
+
+// Função para carregar todos os arquivos da pasta info (txt e pdf)
 async function loadDataCenterFiles(directoryPath: string): Promise<string> {
   const files = fs.readdirSync(directoryPath);
   let combinedContent = '';
@@ -60,32 +66,17 @@ async function loadDataCenterFiles(directoryPath: string): Promise<string> {
   for (const file of files) {
     const filePath = path.join(directoryPath, file);
 
-    // Verifica se é um arquivo .txt ou .pdf
     if (file.endsWith(".txt")) {
       const content = fs.readFileSync(filePath, "utf-8");
       combinedContent += content + "\n";  // Adiciona conteúdo dos arquivos .txt
     } else if (file.endsWith(".pdf")) {
       const pdfBuffer = fs.readFileSync(filePath);
-      const pdfDoc = await PDFDocument.load(pdfBuffer);
-      const text = await extractTextFromPDF(pdfDoc);
+      const text = await extractTextFromPDF(pdfBuffer);
       combinedContent += text + "\n";  // Adiciona texto extraído dos arquivos .pdf
     }
   }
 
   return combinedContent;
-}
-
-// Função para extrair texto de arquivos PDF
-async function extractTextFromPDF(pdfDoc: any): Promise<string> {
-  const pages = pdfDoc.getPages();
-  let text = '';
-  
-  for (const page of pages) {
-    const pageText = await page.getTextContent();
-    text += pageText.items.map((item: any) => item.str).join(' ') + "\n";
-  }
-  
-  return text;
 }
 
 // Load prompt dynamically for the specified agent
@@ -123,11 +114,11 @@ app.post("/ask", async (req: Request, res: Response) => {
     console.log("Agent:", agent);
     console.log("Date:", currentDate);
 
-    // Carregar o conteúdo de todos os arquivos .txt e .pdf na pasta info
-    const datacenterDirectoryPath = path.join(__dirname, "info");
-    const datacenterContent = await loadDataCenterFiles(datacenterDirectoryPath);
+    // Carregar o conteúdo de todos os arquivos na pasta info (txt e pdf)
+    const datacenterFilePath = path.join(__dirname, "info");
+    const datacenterContent = await loadDataCenterFiles(datacenterFilePath);
 
-    // Treinar a IA com o conteúdo do datacenter (caso necessário)
+    // Treinar a IA com o conteúdo de datacenter.txt
     const fileName = `datacenter.txt`;  // Nome fixo do arquivo de treinamento
     await trainAI(fileName);  // Chama a função de treinamento
 

@@ -8,21 +8,14 @@ import { DateTime } from "luxon";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import { trainAI } from './trainAI';  // Importando a função de treinamento
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);  // Corrige o problema com __dirname em módulos ES
 const openaiApiKey = process.env.OPENAI_API_KEY;
 const tavilyApiKey = process.env.TAVILY_API_KEY;
 
 const app = express();
-
-//app.use(
-//  cors({
-//    origin: "https://api.triadfi.co/",
-//  })
-//);
 
 app.use(express.json());
 

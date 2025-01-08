@@ -70,20 +70,30 @@ async function loadPrompt(agent: string, question: string, date: string) {
     throw new Error(`Agent configuration file not found: ${agentFilePath}`);
   }
 
+  // Verifique se a pasta info existe
+  if (!fs.existsSync(infoPath)) {
+    throw new Error(`Info directory not found: ${infoPath}`);
+  }
+
   // Carregar os arquivos da pasta info
   const files = fs.readdirSync(infoPath);
   for (const file of files) {
     const filePath = path.join(infoPath, file);
     let content = "";
 
-    if (file.endsWith(".txt")) {
-      content = fs.readFileSync(filePath, "utf-8");
-    } else if (file.endsWith(".pdf")) {
-      const dataBuffer = fs.readFileSync(filePath);
-      const pdfData = await pdfParse(dataBuffer);
-      content = pdfData.text; // Extrai o texto do PDF
-    } else {
-      continue; // Ignora outros tipos de arquivo
+    try {
+      if (file.endsWith(".txt")) {
+        content = fs.readFileSync(filePath, "utf-8");
+      } else if (file.endsWith(".pdf")) {
+        const dataBuffer = fs.readFileSync(filePath);
+        const pdfData = await pdfParse(dataBuffer);
+        content = pdfData.text; // Extrai o texto do PDF
+      } else {
+        continue; // Ignora outros tipos de arquivo
+      }
+    } catch (error) {
+      console.error(`Error reading file ${filePath}:`, error);
+      continue; // Ignora o arquivo em caso de erro
     }
 
     datacenter += `\n\nArquivo: ${file}\n${content}`;

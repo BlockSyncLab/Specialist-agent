@@ -52,8 +52,9 @@ const workflow = new StateGraph(MessagesAnnotation)
   .addConditionalEdges("agent", shouldContinue);
 
 // Load prompt dynamically for the specified agent
-function loadPrompt(agent: string, question: string, date: string) {
+function loadPrompt(agent: string, question: string, date: string, datacenterContent: string) {
   const agentFilePath = path.join(__dirname, "Crew", `${agent}.txt`);
+  
   console.log("Loading Prompt from:", agentFilePath);
 
   if (!fs.existsSync(agentFilePath)) {
@@ -63,9 +64,11 @@ function loadPrompt(agent: string, question: string, date: string) {
   const agentPromptTemplate = fs.readFileSync(agentFilePath, "utf-8");
   console.log("Loaded Prompt Template:", agentPromptTemplate);
 
+  // Adiciona o conteúdo do datacenter ao prompt
   return agentPromptTemplate
     .replace(/{{DATE}}/g, date)
-    .replace(/{{QUESTION}}/g, question);
+    .replace(/{{QUESTION}}/g, question)
+    .replace(/{{DATACENTER}}/g, datacenterContent);  // Substituindo {{DATACENTER}} pelo conteúdo do treinamento
 }
 
 app.post("/ask", async (req: Request, res: Response) => {
@@ -83,11 +86,19 @@ app.post("/ask", async (req: Request, res: Response) => {
     console.log("Agent:", agent);
     console.log("Date:", currentDate);
 
-    // Antes de processar a pergunta, treina a IA com o arquivo TXT do agente
+    // Carregar o conteúdo do datacenter.txt
+    const datacenterFilePath = path.join(__dirname, "info", "datacenter.txt");  // Atualizado para o diretório correto
+    if (!fs.existsSync(datacenterFilePath)) {
+      throw new Error(`Datacenter file not found: ${datacenterFilePath}`);
+    }
+    const datacenterContent = fs.readFileSync(datacenterFilePath, "utf-8");
+
+    // Treinar a IA com o conteúdo de datacenter.txt
     const fileName = `datacenter.txt`;  // Nome fixo do arquivo de treinamento
     await trainAI(fileName);  // Chama a função de treinamento
 
-    const prompt = loadPrompt(agent, question, currentDate);
+    // Gerar o prompt com o conteúdo do datacenter e a pergunta
+    const prompt = loadPrompt(agent, question, currentDate, datacenterContent);
     console.log("Final Prompt Sent to Model:", prompt);
 
     const finalState = await workflow.compile().invoke({

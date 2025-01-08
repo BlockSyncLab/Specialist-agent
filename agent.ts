@@ -4,26 +4,19 @@ import { HumanMessage } from "@langchain/core/messages";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
 import express, { Request, Response } from "express";
-import cors from "cors";
 import { DateTime } from "luxon";
 import fs from "fs";
 import path from "path";
-import pdfParse from "pdf-parse";
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { PDFDocument } from "pdf-lib";  // Importando para leitura de arquivos PDF
+import { trainAI } from './trainAI';  // Importando a função de treinamento
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);  // Corrige o problema com __dirname em módulos ES
 const openaiApiKey = process.env.OPENAI_API_KEY;
 const tavilyApiKey = process.env.TAVILY_API_KEY;
 
 const app = express();
-
-// app.use(
-//   cors({
-//     origin: "https://api.triadfi.co/",
-//   })
-// );
 
 app.use(express.json());
 
@@ -59,53 +52,60 @@ const workflow = new StateGraph(MessagesAnnotation)
   .addEdge("tools", "agent")
   .addConditionalEdges("agent", shouldContinue);
 
-async function loadPrompt(agent: string, question: string, date: string) {
-  const agentFilePath = path.join(__dirname, "Crew", `${agent}.txt`);
-  const infoPath = path.join(__dirname, "info");
-  let datacenter = "";
+// Função para ler arquivos .txt e .pdf na pasta info
+async function loadDataCenterFiles(directoryPath: string): Promise<string> {
+  const files = fs.readdirSync(directoryPath);
+  let combinedContent = '';
 
+  for (const file of files) {
+    const filePath = path.join(directoryPath, file);
+
+    // Verifica se é um arquivo .txt ou .pdf
+    if (file.endsWith(".txt")) {
+      const content = fs.readFileSync(filePath, "utf-8");
+      combinedContent += content + "\n";  // Adiciona conteúdo dos arquivos .txt
+    } else if (file.endsWith(".pdf")) {
+      const pdfBuffer = fs.readFileSync(filePath);
+      const pdfDoc = await PDFDocument.load(pdfBuffer);
+      const text = await extractTextFromPDF(pdfDoc);
+      combinedContent += text + "\n";  // Adiciona texto extraído dos arquivos .pdf
+    }
+  }
+
+  return combinedContent;
+}
+
+// Função para extrair texto de arquivos PDF
+async function extractTextFromPDF(pdfDoc: any): Promise<string> {
+  const pages = pdfDoc.getPages();
+  let text = '';
+  
+  for (const page of pages) {
+    const pageText = await page.getTextContent();
+    text += pageText.items.map((item: any) => item.str).join(' ') + "\n";
+  }
+  
+  return text;
+}
+
+// Load prompt dynamically for the specified agent
+function loadPrompt(agent: string, question: string, date: string, datacenterContent: string) {
+  const agentFilePath = path.join(__dirname, "Crew", `${agent}.txt`);
+  
   console.log("Loading Prompt from:", agentFilePath);
 
   if (!fs.existsSync(agentFilePath)) {
     throw new Error(`Agent configuration file not found: ${agentFilePath}`);
   }
 
-  // Verifique se a pasta info existe
-  if (!fs.existsSync(infoPath)) {
-    throw new Error(`Info directory not found: ${infoPath}`);
-  }
-
-  // Carregar os arquivos da pasta info
-  const files = fs.readdirSync(infoPath);
-  for (const file of files) {
-    const filePath = path.join(infoPath, file);
-    let content = "";
-
-    try {
-      if (file.endsWith(".txt")) {
-        content = fs.readFileSync(filePath, "utf-8");
-      } else if (file.endsWith(".pdf")) {
-        const dataBuffer = fs.readFileSync(filePath);
-        const pdfData = await pdfParse(dataBuffer);
-        content = pdfData.text; // Extrai o texto do PDF
-      } else {
-        continue; // Ignora outros tipos de arquivo
-      }
-    } catch (error) {
-      console.error(`Error reading file ${filePath}:`, error);
-      continue; // Ignora o arquivo em caso de erro
-    }
-
-    datacenter += `\n\nArquivo: ${file}\n${content}`;
-  }
-
   const agentPromptTemplate = fs.readFileSync(agentFilePath, "utf-8");
   console.log("Loaded Prompt Template:", agentPromptTemplate);
 
+  // Adiciona o conteúdo do datacenter ao prompt
   return agentPromptTemplate
     .replace(/{{DATE}}/g, date)
     .replace(/{{QUESTION}}/g, question)
-    .replace(/{{DATACENTER}}/g, datacenter);
+    .replace(/{{DATACENTER}}/g, datacenterContent);  // Substituindo {{DATACENTER}} pelo conteúdo do treinamento
 }
 
 app.post("/ask", async (req: Request, res: Response) => {
@@ -123,7 +123,16 @@ app.post("/ask", async (req: Request, res: Response) => {
     console.log("Agent:", agent);
     console.log("Date:", currentDate);
 
-    const prompt = await loadPrompt(agent, question, currentDate);
+    // Carregar o conteúdo de todos os arquivos .txt e .pdf na pasta info
+    const datacenterDirectoryPath = path.join(__dirname, "info");
+    const datacenterContent = await loadDataCenterFiles(datacenterDirectoryPath);
+
+    // Treinar a IA com o conteúdo do datacenter (caso necessário)
+    const fileName = `datacenter.txt`;  // Nome fixo do arquivo de treinamento
+    await trainAI(fileName);  // Chama a função de treinamento
+
+    // Gerar o prompt com o conteúdo do datacenter e a pergunta
+    const prompt = loadPrompt(agent, question, currentDate, datacenterContent);
     console.log("Final Prompt Sent to Model:", prompt);
 
     const finalState = await workflow.compile().invoke({

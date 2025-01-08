@@ -8,8 +8,8 @@ import { DateTime } from "luxon";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from 'url';
+import pdfParse from 'pdf-parse';
 import { trainAI } from './trainAI';  // Importando a função de treinamento
-import pdf from 'pdf-parse';  // Importando pdf-parse para extração de texto de PDFs
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);  // Corrige o problema com __dirname em módulos ES
@@ -52,34 +52,38 @@ const workflow = new StateGraph(MessagesAnnotation)
   .addEdge("tools", "agent")
   .addConditionalEdges("agent", shouldContinue);
 
-// Função para extrair texto de arquivos PDF usando pdf-parse
-async function extractTextFromPDF(pdfBuffer: Buffer): Promise<string> {
-  const data = await pdf(pdfBuffer);  // Parse do arquivo PDF
-  return data.text;  // Retorna o texto extraído do PDF
+// Função para ler e extrair texto de arquivos PDF
+async function extractTextFromPDF(pdfPath: string) {
+  const pdfBuffer = fs.readFileSync(pdfPath);
+  const pdfData = await pdfParse(pdfBuffer);
+  return pdfData.text;
 }
 
-// Função para carregar todos os arquivos da pasta info (txt e pdf)
-async function loadDataCenterFiles(directoryPath: string): Promise<string> {
-  const files = fs.readdirSync(directoryPath);
-  let combinedContent = '';
+// Função para carregar arquivos da pasta 'info' (incluindo PDF e TXT)
+async function loadDataCenterFiles() {
+  const infoDir = path.join(__dirname, 'info');
+  const files = fs.readdirSync(infoDir);
+
+  const fileContents = [];
 
   for (const file of files) {
-    const filePath = path.join(directoryPath, file);
+    const filePath = path.join(infoDir, file);
 
-    if (file.endsWith(".txt")) {
-      const content = fs.readFileSync(filePath, "utf-8");
-      combinedContent += content + "\n";  // Adiciona conteúdo dos arquivos .txt
-    } else if (file.endsWith(".pdf")) {
-      const pdfBuffer = fs.readFileSync(filePath);
-      const text = await extractTextFromPDF(pdfBuffer);
-      combinedContent += text + "\n";  // Adiciona texto extraído dos arquivos .pdf
+    if (file.endsWith('.txt')) {
+      const textContent = fs.readFileSync(filePath, 'utf-8');
+      fileContents.push(textContent);
+    }
+
+    if (file.endsWith('.pdf')) {
+      const pdfText = await extractTextFromPDF(filePath);
+      fileContents.push(pdfText);
     }
   }
 
-  return combinedContent;
+  return fileContents.join('\n');  // Unir o conteúdo de todos os arquivos
 }
 
-// Load prompt dynamically for the specified agent
+// Load prompt dinamicamente para o agente especificado
 function loadPrompt(agent: string, question: string, date: string, datacenterContent: string) {
   const agentFilePath = path.join(__dirname, "Crew", `${agent}.txt`);
   
@@ -114,11 +118,10 @@ app.post("/ask", async (req: Request, res: Response) => {
     console.log("Agent:", agent);
     console.log("Date:", currentDate);
 
-    // Carregar o conteúdo de todos os arquivos na pasta info (txt e pdf)
-    const datacenterFilePath = path.join(__dirname, "info");
-    const datacenterContent = await loadDataCenterFiles(datacenterFilePath);
+    // Carregar o conteúdo de todos os arquivos da pasta 'info'
+    const datacenterContent = await loadDataCenterFiles();
 
-    // Treinar a IA com o conteúdo de datacenter.txt
+    // Treinar a IA com o conteúdo de datacenter.txt (ou outros arquivos)
     const fileName = `datacenter.txt`;  // Nome fixo do arquivo de treinamento
     await trainAI(fileName);  // Chama a função de treinamento
 

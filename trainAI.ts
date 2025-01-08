@@ -6,6 +6,10 @@ import { ChatOpenAI } from "@langchain/openai";
 // Função para treinar a IA com informações de um arquivo TXT
 export async function trainAI(fileName: string) {
   try {
+    // Obtém o diretório atual usando import.meta.url
+    const __filename = new URL(import.meta.url).pathname;
+    const __dirname = path.dirname(__filename);  // Deriva o diretório
+
     // Caminho para o arquivo TXT
     const filePath = path.join(__dirname, 'info', fileName);
 

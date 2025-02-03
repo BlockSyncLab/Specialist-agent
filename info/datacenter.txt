@@ -1,14 +1,57 @@
-** Cronograma **
-** Previsão **
-Planejamento - Criação dos PIPs e agendamento da Plurall. 	10 a 21 de fevereiro
-Validação dos PIP's I (Articuladores)	24 a 26 de fevereiro
-Agendamento ReMar I	5 a 9 de maio
-ReMar	12 a 23 de Maio
-Validação dos PIP's II (Articuladores)	26 a 30 de maio
-Agendamento ReMar II	18 a 22 de agosto
-ReMar II	25 de agosto a 05 de setembro
-Validação dos PIP's III(Articuladores)	08 a 12 de setembro
-Agendamento ReMar III	24 a 28 de novembro
-ReMar III	01 a 12 de dezembro
-
-** Informações **
+GESTÃO DE APRENDIZAGEM - BAHIA 
+KIT TGA 
+Trilha de Gestão de Aprendizagem 
+É uma metodologia estruturada para melhorar os processos educacionais, promovendo a recuperação e o fortalecimento da aprendizagem dos estudantes. Ela baseia-se em etapas que integram planejamento, execução, monitoramento e ajustes contínuos. 
+Baseada em dados: utiliza resultados de avaliações como o SAEB e diagnósticos para orientar decisões. 
+Melhoria contínua: garante que o processo educacional seja dinâmico e adaptado às necessidades dos estudantes. 
+Colaboração: envolve gestores, professores e alunos em um esforço coletivo para alcançar melhores resultados. 
+Objetivo: melhorar continuamente os processos educacionais por meio de planejamento, execução, monitoramento e ajustes baseados em dados. 
+Etapas: 
+Planejamento: definição de metas e estratégias; 
+Execução: implementação das ações planejadas; 
+Monitoramento: análise de resultados e verificação de eficácia; 
+Ajustes: aplicações de medidas corretivas ou preventivas. 
+Responsáveis: envolve gestores, coordenadores, professores e estudantes em parceria. 
+Recomposição da Aprendizagem 
+Objetivo: abordar as defasagens de aprendizagem em Língua Portuguesa e Matemática. 
+Possui metodologia alinhada com descritores e competências do SAEB e ENEM, além do uso dos Cadernos Pedagógicos como ferramenta principal. 
+Público-alvo: estudantes do 9º ano do Ensino Fundamental e da 3º série do Ensino Médio. 
+Estratégia: reformar conteúdos essenciais com foco na recuperação de habilidades críticas. 
+Cadernos 
+Capítulos organizados em: aquecimento, atividades práticas, sínteses e exercícios direcionados. 
+Atividades específicas para preparar os estudantes para o SAEB e ENEM. 
+Foco temático: aborda conteúdos essenciais para recomposição e melhoria do desempenho. 
+Ferramentas adicionais: quadro de habilidades e orientações para professores. 
+Benefícios: 
+Ferramenta prática para recomposição de aprendizagens; 
+É baseado em diagnósticos, direcionam o trabalho pedagógico; 
+Facilita a organização de aulas e o reforço de conteúdos críticos. 
+Finalidade: 
+Alinhar as práticas pedagógicas às demandas avaliativas externas (SAEB/ENEM) 
+Promover um ensino mais estratégico e focado em resultados. 
+ 
+Plurall 
+É uma plataforma online que oferece suporte educacional para professores, estudantes e gestores. Seu foco está em facilitar o acesso a conteúdos pedagógicos, promover o aprendizado ativo e fornecer ferramentas para gestão e monitoramento da aprendizagem. 
+Principais funcionalidades 
+Material didático digital, como os Cadernos Pedagógicos e outros recursos; 
+Permite acesso offline ao conteúdo; 
+Apoio prático ao professor, como planos de aula, descritores de habilidades e propostas de atividades alinhadas à BNCC; 
+Ferramentas para planejar e monitorar o desempenho dos alunos; 
+Interatividade para estudantes. como realização de exercícios e simulados diretamente na plataforma; 
+Espaço para anotações e organização de estudos; 
+Relatórios de desempenho e análise de habilidades; 
+Ferramentas de acompanhamento para identificar lacunas de aprendizado; 
+Simulados e atividades baseados nos formatos do SAEB, ENEM e outras avaliações importantes. 
+Benefícios da Plurall 
+Acessibilidade: disponível em formato online e offline, permitindo flexibilidade de uso. 
+Integração com o Ensino Híbrido: facilita o ensino tanto presencial quanto remoto. 
+Personalização: professores podem adaptar conteúdos às necessidades específicas de suas turmas. 
+Eficiência: reduz o tempo de planejamento e aumenta o foco na prática pedagógica. 
+Sistema Gestão de Aprendizagem – SGA 
+É uma solução tecnológica desenvolvida com foco no público de gestores e coordenadores pedagógicos nas unidades escolares e NTEs com finalidade de acompanhamento de seus indicadores educacionais, registro no Plano de Intervenções Pedagógicas — o PIP —, acompanhamento da evolução da rede nos planos de intervenção. 
+É possível diagnosticar problemas e causas; 
+Acompanhar e propor novas ações de intervenções; 
+Acompanhar as visitas pedagógicas, bem como agendamentos e orientações das visitas realizadas pelo NTE da unidade escolar. 
+ReMAR - Reunião de Monitoramento e Avaliação de Resultados 
+Irá subsidiar a correção de rotas em cada ciclo da Trilha de Gestão de Aprendizagem (TGA). As reuniões ocorrem concomitantemente ao período de encerramento das unidades curriculares, contanto com formações específicas pelos articuladores e orientações de maneira contínua. 
+Através da ReMAR é possível rever o planejamento pedagógico, acompanhar o desenrolar da execução com o monitoramento dos registros e inferir problemas para realizar possíveis correções de rotas a fim de atingir as metas planejadas.
